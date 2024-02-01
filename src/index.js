@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 
 //  for storing env variables into process.env
 dotenv.config({
-    path:'./env'
+    path:'./.env'
 });
 
 connectDB().then(
