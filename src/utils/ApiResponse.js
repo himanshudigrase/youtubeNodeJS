@@ -1,3 +1,6 @@
+/*
+Custom APIResponse class which is a good prod pracctice
+*/
 class ApiResponse{
     constructor(statusCode, data, message="Success"){
         this.statusCode = statusCode

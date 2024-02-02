@@ -1,3 +1,7 @@
+/*
+Custom APIError class which is a good production practice
+*/
+
 class ApiError extends Error{
     constructor(
         statusCode,

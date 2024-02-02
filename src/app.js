@@ -30,6 +30,7 @@ app.use(express.urlencoded({extended:true,limit:"16kb"}));
 //To serve static files such as images, CSS files, and JavaScript files
 app.use(express.static("public"));
 
+// Imp library which provides us cookies functionality while serving request
 app.use(cookieParser());
 
 // import routes

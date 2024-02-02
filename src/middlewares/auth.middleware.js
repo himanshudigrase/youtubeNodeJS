@@ -7,7 +7,7 @@ import jwt from "jsonwebtoken"
 // Beacause when we pass middlware to route, it doesnt know what to call first and what to call next.
 // Hence next helps to state what to call next
 
-export const verifyJWT = asyncHandler(async(req,res,next) =>{
+export const verifyJWT = asyncHandler(async(req,_,next) =>{
 try {
         const token = req.cookies?.accessToken || 
         req.header("Authorization")?.replace("Bearer", ""); // This line is for mobile devices which doesn;t have cookie priviledge
@@ -31,3 +31,7 @@ try {
     throw new ApiError(401, error?.message || "Invalid Access Token");
 }
 })
+
+
+// This auth middleware is being sent just before logout request as we are storing the user info 
+// in req so to make the user info available to logout functionality

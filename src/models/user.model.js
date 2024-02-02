@@ -58,6 +58,12 @@ userSchema.pre("save", async function(next){
 });
 
 
+
+/*
+Methods for user schema
+*/
+
+
 userSchema.methods.isPasswordCorrect = async function(password){
     return await brcypt.compare(password, this.password);
 }
