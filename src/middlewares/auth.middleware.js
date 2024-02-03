@@ -1,6 +1,6 @@
-import { User } from "../models/user.model";
-import { ApiError } from "../utils/ApiError";
-import { asyncHandler } from "../utils/asyncHandler";
+import { User } from "../models/user.model.js";
+import { ApiError } from "../utils/ApiError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 import jwt from "jsonwebtoken"
 
 // Why is next being required here?
@@ -9,6 +9,7 @@ import jwt from "jsonwebtoken"
 
 export const verifyJWT = asyncHandler(async(req,_,next) =>{
 try {
+    
         const token = req.cookies?.accessToken || 
         req.header("Authorization")?.replace("Bearer", ""); // This line is for mobile devices which doesn;t have cookie priviledge
     
