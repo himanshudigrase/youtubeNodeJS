@@ -249,6 +249,7 @@ const updateUserAvatar = asyncHandler(async(req,res) =>{
         throw new ApiError(400,"Avatar file is missing");
     }
 
+    // TODO: delete from mongo and cloudinary
     const avatar = await uploadOnCloudinary(avatarLocalPath);
 
     if(!avatar.url){
@@ -298,7 +299,97 @@ const updateUserCoverImage = asyncHandler(async(req,res) =>{
     .json(new ApiResponse(200,user,"Cover image updated successfully"));
 })
 
-export { registerUser,
+
+// Complex stuff ahead
+const getUserChannelProfile = asyncHandler(async(req,res) =>{
+    
+    const {username} = req.params;
+
+    if(!username?.trim()){
+        throw new ApiError(400,"Username is missing");
+    }
+
+
+    // Aggregation piplelines helps us to perform join operations in MongoDB
+    // To achieve this we use aggregation pipelines which has stages
+
+    const channel = await User.aggregate([
+        // Stage 1: match stage is used to filter out docs from User model
+        {
+            $match:{
+                username: username?.toLowerCase()
+            }
+        },
+        // Stage 2: For the particular user we lookup in subscription model to get 
+        // count of number of subscribers that user has and number of channels he has subcribed to
+        {
+            $lookup:{
+                from:"subscriptions",
+                localField:"_id", // ref : User
+                foreignField:"channel", // ref: Subscription
+                as:"Subscribers"
+            }
+        },
+
+        // Stage 3:
+        {
+            $lookup:{
+                from:"subscriptions",
+                localField:"_id",
+                foreignField:"subscriber",
+                as:"subscribedTo"
+            }
+        },
+
+        // Stage 4: Adding count fields
+        // both lookups return array
+        {
+            $addFields:{
+                subscribersCount:{
+                    $size:"$subscribers"
+                },
+                channelsSubscribedToCount:{
+                    $size:"subscribedTo"
+                },
+                isSubscribed: {
+                    $cond:{
+                        if: {$in: [req.user?._id,"$subscribers.subscriber"]},
+                        then: true,
+                        else: false
+                    }
+                }
+            }
+        },
+
+        // Stage 5: Determines which fields to pass along to the next stage
+        {
+            $project:{
+                fullName:1,
+                username:1,
+                subscribersCount:1,
+                channelsSubscribedToCount:1,
+                isSubscribed:1,
+                avatar:1,
+                coverImage:1,
+                email:1
+            }
+        }
+    ])
+
+    if(!channel.length){
+        throw new ApiError(404,"Channel does not exist");
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200,channel[0],"User channel fetched successfully")
+    )
+})
+
+
+export { 
+    registerUser,
      loginUser,
       logoutUser,
       refreshAccessToken,
@@ -306,7 +397,8 @@ export { registerUser,
       getCurrentUser,
       updateAccountDetails,
       updateUserAvatar,
-      updateUserCoverImage
+      updateUserCoverImage,
+      getUserChannelProfile
     };
 
 
