@@ -17,7 +17,8 @@ Upon successfull and unsuccessfull uploading removes from local server
         if(!localFilePath)return null;
         // Upload file on cloudinary
         const response = await cloudinary.uploader.upload(localFilePath,{
-            resource_type:'auto'
+            resource_type:'auto',
+            media_metadata: true // added to get media metadata , eg: duration of video
         });
 
         // File upload successfull
